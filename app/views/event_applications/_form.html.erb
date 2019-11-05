@@ -41,8 +41,8 @@ window.MIN_RESUME_AGE = <%= HackumassWeb::Application::EVENT_APPLICATION_OPTIONS
 
       <div class="form-group event-application-form-group">
         <%= f.label :phone,
-                    'Phone:',
-                    class: 'form-label' %>
+                    'Cell Phone (for emergency and onsite team formation):',
+                    class: 'form-label event-application-required-field' %>
         <%= f.text_field :phone,
                          class: 'form-control',
                          maxlength: 10,
@@ -84,7 +84,7 @@ window.MIN_RESUME_AGE = <%= HackumassWeb::Application::EVENT_APPLICATION_OPTIONS
                     'What\'s your education level?',
                     class: 'form-label event-application-required-field' %>
         <%= f.select :education_lvl,
-                     ['High School Student', 'College Freshman', 'College Sophomore', 'College Junior', 'College Senior', 'Masters', 'PhD', 'Post-Graduation'],
+                     ['High School Student (you will be registered for our PreHacks program in partnership with Boston University :) )', 'College Freshman', 'College Sophomore', 'College Junior', 'College Senior', 'Masters', 'PhD', 'Post-Graduation'],
                      {include_blank: true},
                      {class: 'form-control custom-select'} %>
       </div>
@@ -211,7 +211,7 @@ window.MIN_RESUME_AGE = <%= HackumassWeb::Application::EVENT_APPLICATION_OPTIONS
               </div>
             <% elsif c['type'] == 'textarea' %>
               <%= o.text_area c['name'].to_sym,
-                        rows: '5',
+                        rows: '2',
                         class: 'form-control text-box',
                         onkeyup: 'charCounter()' %>
               <div class="form-label-small event-application-flex-end-container text-box-counter">
