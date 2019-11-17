@@ -194,7 +194,10 @@ window.MIN_RESUME_AGE = <%= HackumassWeb::Application::EVENT_APPLICATION_OPTIONS
                   <%= o.radio_button c['name'].to_sym,
                                     true,
                                     class: 'custom-control-input',
-                                    onclick: c['toggle_field'] ? "toggleHiddenField(\"event_application_custom_fields_#{c['toggle_field']}\", \"event_application_custom_fields_#{c['name']}_true\")" : "" %>
+                                    onclick: 
+                                      c["toggle_multi_fields"] ? 
+                                        (c["toggle_multi_fields"].map{|field| "toggleHiddenField(\"event_application_custom_fields_#{field}\", \"event_application_custom_fields_#{c['name']}_true\")"}.join("; ")) : 
+                                        c['toggle_field'] ? "toggleHiddenField(\"event_application_custom_fields_#{c['toggle_field']}\", \"event_application_custom_fields_#{c['name']}_true\")" : ""  %>
                   <span class="custom-control-label">Yes</span>
                 </label>
                 <% unless c['only_yes'] %>
@@ -202,7 +205,10 @@ window.MIN_RESUME_AGE = <%= HackumassWeb::Application::EVENT_APPLICATION_OPTIONS
                     <%= o.radio_button c['name'].to_sym,
                                       false,
                                       class: 'custom-control-input',
-                                      onclick: c['toggle_field'] ? "toggleHiddenField(\"event_application_custom_fields_#{c['toggle_field']}\", \"event_application_custom_fields_#{c['name']}_true\")" : "" %>
+                                      onclick: 
+                                        c["toggle_multi_fields"] ? 
+                                          (c["toggle_multi_fields"].map{|field| "toggleHiddenField(\"event_application_custom_fields_#{field}\", \"event_application_custom_fields_#{c['name']}_true\")"}.join("; ")) : 
+                                            c['toggle_field'] ? "toggleHiddenField(\"event_application_custom_fields_#{c['toggle_field']}\", \"event_application_custom_fields_#{c['name']}_true\")" : "" %>
                     <span class="custom-control-label">No</span>
                   </label>
                 <% end %>

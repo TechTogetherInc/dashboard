@@ -224,3 +224,4 @@ function updateAge() {
         resumeLabel.classList.remove('resume-optional');
     }
 }
+
