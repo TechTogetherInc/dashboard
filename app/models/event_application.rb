@@ -110,9 +110,7 @@ class EventApplication < ApplicationRecord
         parser = PDF::Reader.new(resume).page(1).text.downcase!.tr!("\n", ' ').squeeze!(' ')
         self.flag = parser.length < 400 || !resume_contains(name, parser) || !(resume_contains(university, parser) || !resume_contains(major, parser))
       rescue
-        errors.add(:invalid_resume, "Resume file is invalid. Please make
-          sure that the file is a OCR PDF. Contact us at \'#{HackumassWeb::Application::CONTACT_EMAIL}\'
-          if you have any more problem uploading your resume.")
+        self.flag = true
       end
     end
   end
@@ -152,16 +150,54 @@ class EventApplication < ApplicationRecord
     UserMailer.submit_email(user).deliver_now
   end
 
+
+  
+
+
   # Generating CSV for all Event Applications
 	def self.to_csv
 		CSV.generate do |csv|
 
-			csv << EventApplication.attribute_names
+      finalKeyArr = Array.new
+      keyArr = Array.new
+      keyArr = EventApplication.first.attributes.keys
+      hashKeyArr = EventApplication.first.attributes.values.last
+      keyArrLength = keyArr.length() - 2
+
+      for i in 0..keyArrLength 
+        finalKeyArr.push(keyArr[i])
+      end
+
+      for key, value in hashKeyArr
+        finalKeyArr.push(key)
+      end
+
+      csv << finalKeyArr
+    
 
 			EventApplication.find_each do |app|
-				csv << app.attributes.values
-		  	end
-		end
-	end
 
+        arr = Array.new
+        arr = app.attributes.values
+        finalArr = Array.new
+        arrLength = arr.length() - 2
+
+        for i in 0..arrLength
+          finalArr.push(arr[i])  
+        end
+        
+        hashArr = arr[arrLength + 1]
+
+        for key, value in hashArr
+          finalArr.push(value)
+        end
+
+        csv << finalArr
+
+		  	end
+    end
+    
+  
+  end
+  
 end
