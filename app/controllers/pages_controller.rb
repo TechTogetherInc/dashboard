@@ -17,6 +17,12 @@ class PagesController < ApplicationController
     if CustomRsvp.where(user_id: @current_user.id).exists?
       @rsvp = CustomRsvp.where(user_id: @current_user.id).first
       @rsvp_new = false
+
+      # get hashed application ID of user
+      @hashed_id = EventApplication.find_by(user_id: current_user.id).id.hash.to_s
+      if @hashed_id[0] == '-'
+        @hashed_id[0] = 'N'
+      end
     else
       @rsvp = CustomRsvp.new
       @rsvp_new = true
