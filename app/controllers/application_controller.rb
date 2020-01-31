@@ -8,8 +8,12 @@ class ApplicationController < ActionController::Base
   before_action :set_raven_context
   after_action  :set_access_control_headers
   after_action  :set_extra_headers
+  # full: true means that the string searched will look for the match anywhere in the "email" string, and not just the beginning
   autocomplete :university, :name, full: true
   autocomplete :major, :name, full: true
+  autocomplete :user, :email, full: true
+  autocomplete :prize, :name, full: true
+
 
   def set_access_control_headers
     headers['Access-Control-Allow-Origin'] = '*'
@@ -38,6 +42,7 @@ class ApplicationController < ActionController::Base
   $Prizes = 'prizes'
   $CheckIn = 'check_in'
   $Hardware = 'hardware'
+  $Judging = 'judging'
 
   def check_feature_flag?(feature_flag_name)
     feature_flag = FeatureFlag.find_by(name: feature_flag_name)
@@ -108,6 +113,48 @@ class ApplicationController < ActionController::Base
     if res["ok"]
       return res["user"]["profile"]["email"]
     end
+  end
+
+  def slack_reassociate_users(user_email = nil, force = false)
+    bot_accesstok = HackumassWeb::Application::SLACKINTEGRATION_BOT_ACCESS_TOKEN
+    if not bot_accesstok or bot_accesstok.length == 0
+      puts "No bot access token"
+      return false
+    end
+    puts "Getting email and user ids from Slack"
+
+    uri = URI.parse("https://slack.com/api/users.list?token=#{bot_accesstok}")
+    request = Net::HTTP::Get.new(uri)
+    puts request
+
+    req_options = {
+      use_ssl: uri.scheme == "https",
+    }
+
+    response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
+      http.request(request)
+    end
+
+    count = 0
+    res = JSON.parse(response.body)
+    if res["ok"]
+      res["members"].each do |member|
+        email = member["profile"]["email"]
+        if user_email == nil or email == user_email
+          slack_id = member["id"]
+          user = User.where(:email => email)
+          if email != nil and user.length == 1
+            if user[0].slack_id == nil or force
+              user[0].slack_id = slack_id
+              user[0].save
+              puts "Associated #{email} with slack id #{slack_id}"
+              count += 1
+            end
+          end
+        end
+      end
+    end
+    return count
   end
 
   protected

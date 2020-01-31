@@ -4,6 +4,10 @@ Rails.application.routes.draw do
   get 'slackintegration/index'
   post 'slackintegration/index'
 
+  get 'slackintegration/reassociate_self'
+  get 'slackintegration/reassociate_all'
+  get 'slackintegration/admin'
+
   resources :prizes
   # Our Root URL Links to the index page (duh)
   root 'pages#index'
@@ -19,10 +23,11 @@ Rails.application.routes.draw do
       delete 'logout', to: 'devise/sessions#destroy', as: :destroy_user_session
       get 'signup', to: 'devise/registrations#new', as: :new_user_registration
       post 'signup', to: 'devise/registrations#create', as: :user_registration
+      patch 'signup', to: 'devise/registrations#update', as: :update_user_registration
       get 'change_pass', to: 'users#go_to_forgot'
     end
 
-  #Authentication Routes End
+  # Authentication Routes End
 
 
   # Event Application Routes Start
@@ -48,12 +53,9 @@ Rails.application.routes.draw do
 
   # Event Application Routes End
 
+
   resources :custom_rsvps, except: [:destroy] do
-
   end
-
-
-
 
 
   # Mentorship Request Routes Start
@@ -68,10 +70,7 @@ Rails.application.routes.draw do
       end
     end
 
-
-
   # Mentorship Request Routes End
-
 
 
   # Events Routes Start
@@ -82,6 +81,7 @@ Rails.application.routes.draw do
       post 'remove_user' => 'events#remove_user'
       post 'check_in_to_event' => 'events#check_in'
     end 
+
   # Events Routes End
 
 
@@ -121,6 +121,9 @@ Rails.application.routes.draw do
 
   # Pages Routes End
 
+
+  # Projects Routes Start
+
     resources :projects do
       get 'team' => 'projects#team', :as => :team
       post 'add_team_member' => 'projects#add_team_member', :as => :add_team_member
@@ -133,10 +136,18 @@ Rails.application.routes.draw do
 
     get 'projects/new/project_submit_info' => 'projects#project_submit_info', :as => :project_submit_info
 
+  # Projects Routes End
+
+
   # Hardware Routes Start
 
     # Allow autocomplete on hardware checkout page
     resources :hardware_checkouts, only: [:create, :destroy] do
+      get :autocomplete_user_email, :on => :collection
+    end
+
+    # Allow autocomplete on user email for all checked out items
+    resources :hardware_items, only: [:all_checked_out] do
       get :autocomplete_user_email, :on => :collection
     end
 
@@ -151,31 +162,46 @@ Rails.application.routes.draw do
       end
     end
 
-    # Allow autocomplete on user email for all checked out items
-    resources :hardware_items, only: [:all_checked_out] do
-      get :autocomplete_user_email, :on => :collection
-    end
-
   # Hardware Routes End
 
-  # Email Routes Begin
+
+  # Email Routes Start
+
     resources :emails do
       get 'send' => 'emails#send_email'
     end
+
   # Email Routes End
 
-  # Feature Flag Routes Start
-   resources :feature_flags, except: [:create, :destroy, :edit, :show] do
-     collection do
-       post 'enable'
-       post 'disable'
-     end
-   end
+  resources :judging do
+    post 'assign_score'
+    get :autocomplete_user_email, :on => :collection
+    get :autocomplete_prize_name, :on => :collection
+    collection do
+      get 'search', :as => :search
+      get 'assign'
+      get 'results'
+    end
+  end
+  post 'judging/assign_judge' => 'judging#add_judge_assignment', :as => :judging_assign
+  post 'judging/unassign_judge' => 'judging#remove_judge_assignment', :as => :judging_unassign
+
+  post 'judging/create_judgement' => 'judging#create', :as => :judgements
+  post 'judging/destroy' => 'judging#destroy', :as => :destroy_judgement
+  get 'judgings' => 'judging#index'
+  get 'paper_judging' => 'paper_judging#index'
+  post 'generate_forms' => 'paper_judging#generate_forms'
+  get "#{Rails.root}/public/judging/judging.pdf", :to => redirect("/judging/judging.pdf?#{Time.now.to_i}")
+
+
+    resources :feature_flags, except: [:create, :destroy, :edit, :show] do
+      collection do
+        post 'enable'
+        post 'disable'
+      end
+    end
+
   # Feature Flag Routes End
 
-  # Judging Routes Begin
-  get 'judgings' => 'judging#index'
-  post 'generateforms' => 'judging#generateforms'
-  get "#{Rails.root}/public/judging/judging.pdf", :to => redirect("/judging/judging.pdf?#{Time.now.to_i}")
-  # Judging Routes End
+
 end

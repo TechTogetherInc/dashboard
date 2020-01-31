@@ -9,7 +9,7 @@
           <a href="#" class="nav-link pr-0 leading-none" data-toggle="dropdown">
             <span class="avatar" style="background-image: url('https://d1mpvgh3wz53k.cloudfront.net/Content/img/empty-user-photo.png')"></span>
             <span class="ml-2 d-none d-lg-block">
-              <span class="text-default"><%= current_user.full_name.titleize%></span>
+              <span class="text-default"><%= current_user.full_name.camelcase%></span>
               <small class="text-muted d-block mt-1"><%= current_user.user_type.capitalize %></small>
             </span>
           </a>
@@ -18,10 +18,7 @@
               <i class="dropdown-icon fe fe-log-out"></i> Sign out
             <% end %>
             <%= link_to edit_user_registration_path, class: 'dropdown-item' do %>
-              <i class="dropdown-icon fe fe-log-out"></i> Account Settings
-            <% end %>
-            <%= link_to change_pass_path, class: 'dropdown-item' do %>
-              <i class="dropdown-icon fe fe-log-out"></i> Change Password
+              <i class="dropdown-icon fe fe-settings"></i> Account Settings
             <% end %>
           </div>
         </div>
@@ -110,24 +107,32 @@
             <% if current_user.is_attendee?%>
               <% if HackumassWeb::Application::PROJECTS_PUBLIC %>
                 <li class="nav-item">
-                  <%= link_to projects_path, class: "nav-link #{'active' if is_projects_active?}" do %>
+                  <%= link_to projects_path, class: "nav-link #{'active' if is_projects_view_active?}" do %>
                     <i class="fe fe-layers"></i> Projects</a>
                   <% end %>
                 </li>
               <% end %>
               <li class="nav-item">
-                <%= link_to project_submit_info_path, class: "nav-link #{'active' if is_projects_active? and not HackumassWeb::Application::PROJECTS_PUBLIC}" do %>
+                <%= link_to project_submit_info_path, class: "nav-link #{'active' if is_projects_create_active?}" do %>
                   <i class="fe fe-layers"></i> My Project</a>
                 <% end %>
               </li>
 
             <% else %>
               <li class="nav-item">
-                <%= link_to projects_path, class: "nav-link #{'active' if is_projects_active?}" do %>
+                <%= link_to projects_path, class: "nav-link #{'active' if is_projects_view_active?}" do %>
                   <i class="fe fe-layers"></i> Projects</a>
                 <% end %>
               </li>
             <% end %>
+          <% end %>
+
+          <% if has_access_to_judging?%>
+            <li class="nav-item">
+              <%= link_to judging_index_path, class: "nav-link #{'active' if is_judging_active?}" do %>
+                <i class="fe fe-book"></i>Judging</a>
+              <% end %>
+            </li>
           <% end %>
 
           <% if has_access_to_admin? %>
@@ -137,7 +142,7 @@
                 <%= link_to 'Permissions', admin_path, class: 'dropdown-item'%>
                 <%= link_to 'Emails', emails_path, class: 'dropdown-item'%>
                 <%= link_to 'Feature Flags', feature_flags_path, class: 'dropdown-item'%>
-                <%= link_to 'Judging', judgings_path, class: 'dropdown-item' %>
+                <%= link_to 'Slack Integration', slackintegration_admin_path, class: 'dropdown-item' %>
               </div>
             </li>
           <% end %>

@@ -4,9 +4,6 @@ class PagesController < ApplicationController
   before_action :check_permissions, only: [:add_permissions, :remove_permissions, :admin]
   before_action -> { is_feature_enabled($CheckIn) }, only: :check_in
   before_action :check_organizer_permissions, only: :check_in
-  # allows autocomplete to work on the email field in user and creates a route through pages,
-  # :full => true means that the string searched will look for the match anywhere in the "email" string, and not just the beginning
-  autocomplete :user, :email, :full => true
 
   def index
 
@@ -107,11 +104,12 @@ class PagesController < ApplicationController
 
       user.check_in = true
       if user.save
-        if user.is_host_student?
-          redirect_to check_in_path, notice: "This participant is a #{HackumassWeb::Application::CHECKIN_UNIVERSITY_NAME} student. #{user.full_name.titleize} has been checked in successfully."
-        else
-          redirect_to check_in_path, notice: "***THIS PARTICIPANT IS A NON-#{HackumassWeb::Application::CHECKIN_UNIVERSITY_NAME} STUDENT.*** #{user.full_name.titleize} has been checked in successfully. "
-        end
+        redirect_to check_in_path, notice: "#{user.full_name.titleize} has been checked in successfully."
+        # if user.is_host_student?
+        #   redirect_to check_in_path, notice: "This participant is a #{HackumassWeb::Application::CHECKIN_UNIVERSITY_NAME} student. #{user.full_name.titleize} has been checked in successfully."
+        # else
+        #   redirect_to check_in_path, notice: "***THIS PARTICIPANT IS A NON-#{HackumassWeb::Application::CHECKIN_UNIVERSITY_NAME} STUDENT.*** #{user.full_name.titleize} has been checked in successfully. "
+        # end
         return
       end
 
@@ -159,7 +157,7 @@ class PagesController < ApplicationController
 
   def remove_permissions
     @user = User.find(params[:format])
-    if User.where(user_type: "admin").length == 1
+    if @user.is_admin? and User.where(user_type: "admin").length == 1 
       redirect_to admin_path, alert: "Unable to remove permissions. There must be at least 1 administrator."
     else
       @user.user_type = 'attendee'
